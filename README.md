@@ -6,7 +6,7 @@ Mettre en place les bonnes pratique sur les notions suivantes
         -- LoadBalancer(pour les cloud provider)
 =» INGRESS
 =» Stockage:
-      PV
-      PVC
-      Volume
+        Persistance des données à l'echele d'un noed :Volume
+        Persistance des données à l'echelle du cluster: PV PVC
+
 
