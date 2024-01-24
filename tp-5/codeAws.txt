@@ -1,0 +1,38 @@
+sudo apt update
+sudo apt install -y unzip
+export AWS_ACCESS_KEY_ID= ton acces key
+export AWS_SECRET_ACCESS_KEY= ton acces key
+export AWS_DEFAULT_REGION=us-east-1
+
+# install eksctl
+curl --silent --location "https://github.com/weaveworks/eksctl/releases/latest/download/eksctl_$(uname -s)_amd64.tar.gz" | tar xz -C /tmp
+sudo mv /tmp/eksctl /usr/local/bin
+
+# install awscli
+curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+unzip awscliv2.zip
+sudo ./aws/install
+
+# install kubectl
+curl -o kubectl https://amazon-eks.s3.us-west-2.amazonaws.com/1.17.9/2020-08-04/bin/linux/amd64/kubectl
+chmod +x ./kubectl
+sudo mv ./kubectl /usr/local/bin
+
+# install du cluster
+#--ssh-access  --ssh-public-key devops-narcisse: active la connexion ssh et copie la clé devops-narcisse dans les serveur
+eksctl create cluster --name=eazy --ssh-access --ssh-public-key devops-narcisse --nodes=1 --nodes-max 5 --asg-access
+
+# retrieve credentials
+eksctl utils write-kubeconfig --name=eazy --kubeconfig=$HOME/eazy
+export KUBECONFIG=$HOME/eazy
+
+# install k8s autocomplete
+sudo echo 'source <(kubectl completion bash)' >> ${HOME}/.bashrc && source ${HOME}/.bashrc
+
+# test cluster
+kubectl create namespace my-namespace
+kubectl apply -f sample-service.yaml
+kubectl get all -n my-namespace
+POD=$(kubectl get -n my-namespace pod -l app=my-app -o jsonpath="{.items[0].metadata.name}")
+kubectl -n my-namespace exec -it $POD  -n my-namespace -- /bin/bash
+curl  my-service.my-namespace.svc.cluster.local
